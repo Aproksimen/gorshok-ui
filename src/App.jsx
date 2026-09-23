@@ -24,7 +24,6 @@ function App() {
   ]);
 
   const handleSend = async (text) => {
-    // 1. Сообщение пользователя
     const userMessage = {
       message: text,
       sentTime: 'just now',
@@ -34,7 +33,6 @@ function App() {
     };
     setMessages((prev) => [...prev, userMessage]);
 
-    // 2. Индикатор "печатает..." с уникальным id
     const loadingId = Date.now();
     setMessages((prev) => [
       ...prev,
@@ -48,7 +46,6 @@ function App() {
       },
     ]);
 
-    // 3. Запрос к n8n
     try {
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
@@ -64,7 +61,6 @@ function App() {
       const replyText =
         data.reply || data.response || 'Пустой ответ от сервера';
 
-      // 4. Заменяем индикатор на реальный ответ
       setMessages((prev) =>
         prev.map((m) =>
           m.id === loadingId
@@ -97,16 +93,7 @@ function App() {
   };
 
   return (
-    <div
-      style={{
-        height: '100%',
-        width: '100%',
-        paddingTop: 'env(safe-area-inset-top, 44px)',
-        paddingBottom: 'env(safe-area-inset-bottom, 20px)',
-        boxSizing: 'border-box',
-        backgroundColor: '#fff',
-      }}
-    >
+    <div className="app-wrapper">
       <MainContainer>
         <ChatContainer>
           <MessageList>

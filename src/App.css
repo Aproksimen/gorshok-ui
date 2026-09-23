@@ -1,0 +1,38 @@
+/* Фиксируем приложение на весь экран — iOS не сможет "двигать" страницу */
+.app-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  /* Учитываем safe-area: статус-бар сверху, home-индикатор снизу */
+  padding-top: env(safe-area-inset-top, 44px);
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
+
+  box-sizing: border-box;
+  background-color: #fff;
+  overflow: hidden;
+}
+
+/* Ограничиваем ширину внутренних элементов чата — чтобы кнопка отправки не уезжала */
+.app-wrapper .cs-main-container,
+.app-wrapper .cs-chat-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Поле ввода тоже ограничиваем */
+.app-wrapper .cs-message-input {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Сам инпут — чтобы длинный placeholder не растягивал контейнер */
+.app-wrapper .cs-message-input__content-editor-wrapper {
+  min-width: 0 !important;
+}
