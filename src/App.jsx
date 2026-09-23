@@ -44,7 +44,16 @@ function App() {
   };
 
   return (
-    <div style={{ height: '100%', width: '100%' }}>
+    <div
+      style={{
+        height: '100%',
+        width: '100%',
+        paddingTop: 'env(safe-area-inset-top, 44px)',
+        paddingBottom: 'env(safe-area-inset-bottom, 20px)',
+        boxSizing: 'border-box',
+        backgroundColor: '#fff',
+      }}
+    >
       <MainContainer>
         <ChatContainer>
           <MessageList>
