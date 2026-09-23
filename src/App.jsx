@@ -9,6 +9,9 @@ import {
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import './App.css';
 
+const WEBHOOK_URL =
+  'https://main-production-a2c6.up.railway.app/webhook/compressorSelect';
+
 function App() {
   const [messages, setMessages] = useState([
     {
@@ -20,7 +23,8 @@ function App() {
     },
   ]);
 
-  const handleSend = (text) => {
+  const handleSend = async (text) => {
+    // 1. Сообщение пользователя
     const userMessage = {
       message: text,
       sentTime: 'just now',
@@ -30,17 +34,66 @@ function App() {
     };
     setMessages((prev) => [...prev, userMessage]);
 
-    // Имитация ответа от бота (позже заменим на запрос к n8n)
-    setTimeout(() => {
-      const botReply = {
-        message: `Получил ваш запрос: "${text}". Уже подбираю варианты!`,
+    // 2. Индикатор "печатает..." с уникальным id
+    const loadingId = Date.now();
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: loadingId,
+        message: '…',
         sentTime: 'just now',
         sender: 'assistant',
         direction: 'incoming',
         position: 'single',
-      };
-      setMessages((prev) => [...prev, botReply]);
-    }, 800);
+      },
+    ]);
+
+    // 3. Запрос к n8n
+    try {
+      const response = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const replyText =
+        data.reply || data.response || 'Пустой ответ от сервера';
+
+      // 4. Заменяем индикатор на реальный ответ
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === loadingId
+            ? {
+                message: replyText,
+                sentTime: 'just now',
+                sender: 'assistant',
+                direction: 'incoming',
+                position: 'single',
+              }
+            : m
+        )
+      );
+    } catch (error) {
+      console.error('Webhook error:', error);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === loadingId
+            ? {
+                message: `Ошибка: ${error.message}. Проверьте, что workflow в n8n активен и CORS настроен.`,
+                sentTime: 'just now',
+                sender: 'assistant',
+                direction: 'incoming',
+                position: 'single',
+              }
+            : m
+        )
+      );
+    }
   };
 
   return (
@@ -58,7 +111,7 @@ function App() {
         <ChatContainer>
           <MessageList>
             {messages.map((m, i) => (
-              <Message key={i} model={m} />
+              <Message key={m.id ?? i} model={m} />
             ))}
           </MessageList>
           <MessageInput
