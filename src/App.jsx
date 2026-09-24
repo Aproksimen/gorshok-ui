@@ -9,6 +9,8 @@ import {
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import './App.css';
 
+const FILE_INPUT_ID = 'chat-file-input';
+
 const WEBHOOK_URL =
   'https://main-production-a2c6.up.railway.app/webhook/compressorSelect';
 
@@ -318,16 +320,16 @@ function App() {
           <MessageInput
             placeholder="Введите ваш запрос..."
             onSend={handleSend}
-            onAttachClick={() => fileInputRef.current?.click()}
-          />
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="file-input"
-            onChange={handleFileChange}
           />
         </ChatContainer>
+        <input
+          id={FILE_INPUT_ID}
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="file-input"
+          onChange={handleFileChange}
+        />
       </MainContainer>
     </div>
   );

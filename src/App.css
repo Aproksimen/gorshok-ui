@@ -16,6 +16,7 @@
 }
 
 .app-wrapper .cs-main-container {
+  position: relative;
   flex: 1 1 auto;
   width: 100% !important;
   height: 100% !important;
@@ -24,6 +25,33 @@
   min-height: 0 !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
+}
+
+.app-wrapper .file-input {
+  /* Прозрачная, но реальная область <input type="file"> поверх кнопки скрепки.
+     Прямое касание по input открывает iOS-меню "Выбрать фото / Сделать фото"
+     без программного .click(), который Safari часто игнорирует. */
+  position: absolute;
+  bottom: env(safe-area-inset-bottom, 0);
+  left: 0;
+  width: 3.2rem;
+  height: 3.2rem;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 20;
+  /* У file input в WebKit свой шрифт по умолчанию; для rem-размеров
+     приводим его к размеру root, чтобы совпадало с кнопкой. */
+  font-size: 1rem;
+}
+
+/* Подгоняем стандартную кнопку под размер прозрачной «насадки». */
+.app-wrapper .cs-button--attachment {
+  width: 3rem !important;
+  min-width: 3rem !important;
+  max-width: 3rem !important;
+  height: 3rem !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .app-wrapper .cs-chat-container {
@@ -99,15 +127,4 @@
   border-radius: 0.5em;
 }
 
-.app-wrapper .file-input {
-  /* Do NOT use display: none — iOS Safari blocks programmatic clicks
-     on display:none file inputs. Keep it invisible but present in layout. */
-  position: absolute;
-  top: 0;
-  left: 0;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
+
