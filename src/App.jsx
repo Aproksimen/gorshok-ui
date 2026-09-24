@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   MainContainer,
   ChatContainer,
@@ -13,6 +13,38 @@ const WEBHOOK_URL =
   'https://main-production-a2c6.up.railway.app/webhook/compressorSelect';
 
 function App() {
+  useEffect(() => {
+    const updateViewport = () => {
+      const vv = window.visualViewport;
+      if (vv) {
+        document.documentElement.style.setProperty(
+          '--vv-height',
+          `${vv.height}px`
+        );
+        document.documentElement.style.setProperty(
+          '--vv-width',
+          `${vv.width}px`
+        );
+      }
+    };
+
+    updateViewport();
+    const vv = window.visualViewport;
+    if (vv) {
+      vv.addEventListener('resize', updateViewport);
+      vv.addEventListener('scroll', updateViewport);
+    }
+    window.addEventListener('resize', updateViewport);
+
+    return () => {
+      if (vv) {
+        vv.removeEventListener('resize', updateViewport);
+        vv.removeEventListener('scroll', updateViewport);
+      }
+      window.removeEventListener('resize', updateViewport);
+    };
+  }, []);
+
   const [messages, setMessages] = useState([
     {
       message: 'Здравствуйте! Опишите вашу задачу, и я подберу компрессор.',
