@@ -1,10 +1,13 @@
 .app-wrapper {
   position: fixed;
-  inset: 0;
+  /* Anchor directly to the visual viewport so the chat stays visible
+     even when iOS shifts the visual viewport up for the keyboard. */
+  top: var(--vv-top, 0px);
+  left: var(--vv-left, 0px);
   width: var(--vv-width, 100vw);
   height: var(--vv-height, 100dvh);
-  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0)
-    env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) 0
+    env(safe-area-inset-left, 0);
   box-sizing: border-box;
   background-color: #fff;
   overflow: hidden;
