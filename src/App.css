@@ -91,3 +91,14 @@
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
+
+.app-wrapper .cs-message__image-content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5em;
+}
+
+.app-wrapper .file-input {
+  display: none;
+}
