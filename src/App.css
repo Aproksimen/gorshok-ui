@@ -19,6 +19,8 @@
   min-width: 0 !important;
   max-width: 100% !important;
   min-height: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
 }
 
 .app-wrapper .cs-chat-container {
@@ -26,6 +28,7 @@
   height: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .app-wrapper .cs-message-list {
@@ -39,6 +42,8 @@
   max-width: 100% !important;
   min-width: 0 !important;
   flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+  padding-bottom: env(safe-area-inset-bottom) !important;
 }
 
 .app-wrapper .cs-message-input__content-editor-wrapper,
@@ -46,6 +51,18 @@
   flex: 1 1 auto !important;
   min-width: 0 !important;
   width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.app-wrapper .cs-message-input__tools {
+  flex-shrink: 0 !important;
+}
+
+.app-wrapper .cs-button--send {
+  flex-shrink: 0 !important;
+  min-width: 2.5em !important;
+  width: auto !important;
 }
 
 .app-wrapper .cs-message__content {
