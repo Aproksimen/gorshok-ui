@@ -115,41 +115,52 @@ function App() {
   }, []);
 
   // Поддержка вставки изображения из буфера обмена.
+  // Текст вставляем без форматирования, чтобы шрифт оставался единообразным.
   useEffect(() => {
     const editor = document.querySelector('.cs-message-input__content-editor');
     if (!editor) return;
 
     const handlePaste = (e) => {
-      const items = e.clipboardData?.items;
-      if (!items) return;
+      const clipboardData = e.clipboardData || window.clipboardData;
+      if (!clipboardData) return;
 
-      for (let i = 0; i < items.length; i += 1) {
-        const item = items[i];
-        if (item.kind === 'file' && item.type.startsWith('image/')) {
-          e.preventDefault();
-          const file = item.getAsFile();
-          if (!file) continue;
+      const items = clipboardData.items;
+      if (items) {
+        for (let i = 0; i < items.length; i += 1) {
+          const item = items[i];
+          if (item.kind === 'file' && item.type.startsWith('image/')) {
+            e.preventDefault();
+            const file = item.getAsFile();
+            if (!file) continue;
 
-          fileToJpegDataUrl(file)
-            .then((dataUrl) => {
-              setPendingImage(dataUrl);
-              setInputValue(PENDING_IMAGE_PLACEHOLDER);
-            })
-            .catch((error) => {
-              console.error('Clipboard image processing error:', error);
-              setMessages((prev) => [
-                ...prev,
-                {
-                  message: 'Не удалось обработать вставленное изображение.',
-                  sentTime: 'just now',
-                  sender: 'assistant',
-                  direction: 'incoming',
-                  position: 'single',
-                },
-              ]);
-            });
-          break;
+            fileToJpegDataUrl(file)
+              .then((dataUrl) => {
+                setPendingImage(dataUrl);
+                setInputValue(PENDING_IMAGE_PLACEHOLDER);
+              })
+              .catch((error) => {
+                console.error('Clipboard image processing error:', error);
+                setMessages((prev) => [
+                  ...prev,
+                  {
+                    message: 'Не удалось обработать вставленное изображение.',
+                    sentTime: 'just now',
+                    sender: 'assistant',
+                    direction: 'incoming',
+                    position: 'single',
+                  },
+                ]);
+              });
+            return;
+          }
         }
+      }
+
+      // Вставляем только plain text, игнорируя стили из Telegram/Word и т.п.
+      const plainText = clipboardData.getData('text/plain');
+      if (plainText) {
+        e.preventDefault();
+        document.execCommand('insertText', false, plainText);
       }
     };
 
