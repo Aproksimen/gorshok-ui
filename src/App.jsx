@@ -57,8 +57,12 @@ async function fileToJpegDataUrl(file) {
   }
 }
 
+const PENDING_IMAGE_PLACEHOLDER = '📎 Изображение';
+
 function App() {
   const fileInputRef = useRef(null);
+  const [inputValue, setInputValue] = useState('');
+  const [pendingImage, setPendingImage] = useState(null);
 
   useEffect(() => {
     const updateViewport = () => {
@@ -110,6 +114,49 @@ function App() {
     };
   }, []);
 
+  // Поддержка вставки изображения из буфера обмена.
+  useEffect(() => {
+    const editor = document.querySelector('.cs-message-input__content-editor');
+    if (!editor) return;
+
+    const handlePaste = (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i += 1) {
+        const item = items[i];
+        if (item.kind === 'file' && item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (!file) continue;
+
+          fileToJpegDataUrl(file)
+            .then((dataUrl) => {
+              setPendingImage(dataUrl);
+              setInputValue(PENDING_IMAGE_PLACEHOLDER);
+            })
+            .catch((error) => {
+              console.error('Clipboard image processing error:', error);
+              setMessages((prev) => [
+                ...prev,
+                {
+                  message: 'Не удалось обработать вставленное изображение.',
+                  sentTime: 'just now',
+                  sender: 'assistant',
+                  direction: 'incoming',
+                  position: 'single',
+                },
+              ]);
+            });
+          break;
+        }
+      }
+    };
+
+    editor.addEventListener('paste', handlePaste);
+    return () => editor.removeEventListener('paste', handlePaste);
+  }, []);
+
   const [messages, setMessages] = useState([
     {
       message: 'Здравствуйте! Опишите вашу задачу, и я подберу компрессор.',
@@ -121,14 +168,30 @@ function App() {
   ]);
 
   const handleSend = async (text) => {
+    // Извлекаем чистый текст из innerHTML, который присылает MessageInput.
+    const tmp = document.createElement('div');
+    tmp.innerHTML = text || '';
+    const plainText = tmp.textContent || '';
+
+    const imageToSend = pendingImage;
+    const caption =
+      plainText === PENDING_IMAGE_PLACEHOLDER ? '' : plainText;
+
     const userMessage = {
-      message: text,
+      message: caption,
       sentTime: 'just now',
       sender: 'user',
       direction: 'outgoing',
       position: 'single',
+      ...(imageToSend && { image: imageToSend }),
     };
     setMessages((prev) => [...prev, userMessage]);
+
+    // Отправили сообщение — очищаем поле ввода и отложенное изображение.
+    setInputValue('');
+    if (imageToSend) {
+      setPendingImage(null);
+    }
 
     const loadingId = Date.now();
     setMessages((prev) => [
@@ -144,10 +207,18 @@ function App() {
     ]);
 
     try {
+      const payload = imageToSend
+        ? {
+            message: caption,
+            image: imageToSend.slice(imageToSend.indexOf(',') + 1),
+            imageMimeType: 'image/jpeg',
+          }
+        : { message: plainText };
+
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -319,7 +390,19 @@ function App() {
           </MessageList>
           <MessageInput
             placeholder="Введите ваш запрос..."
+            value={inputValue}
+            onChange={(html) => {
+              setInputValue(html);
+              // Если пользователь стёр плейсхолдер с картинкой, сбрасываем её.
+              const tmp = document.createElement('div');
+              tmp.innerHTML = html || '';
+              if (!tmp.textContent && pendingImage) {
+                setPendingImage(null);
+              }
+            }}
             onSend={handleSend}
+            activateAfterChange
+            sendDisabled={pendingImage ? false : undefined}
           />
         </ChatContainer>
         <input
