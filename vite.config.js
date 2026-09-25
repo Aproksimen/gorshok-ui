@@ -12,8 +12,8 @@ export default defineConfig({
         name: 'Подбор компрессоров',
         short_name: 'Компрессоры',
         description: 'Приложение для подбора компрессоров',
-        theme_color: '#000000',
-        background_color: '#ffffff',
+        theme_color: '#16a878',
+        background_color: '#f4f6f9',
         display: 'standalone',
         start_url: '/',
         icons: [

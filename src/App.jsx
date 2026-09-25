@@ -14,7 +14,7 @@ import './App.css';
 const FILE_INPUT_ID = 'chat-file-input';
 
 // Логотип бренда (лежит в public/), используется в шапке и у аватара бота.
-const BRAND_LOGO = '/pwa-512x512.png';
+const BRAND_LOGO = '/gorshok-logo.png';
 const BRAND_TITLE = 'Подбор компрессора';
 const BRAND_NAME = 'GORSHOK';
 const BRAND_STATUS = 'Онлайн';

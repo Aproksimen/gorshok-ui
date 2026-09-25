@@ -1,12 +1,14 @@
-/* ==== Дизайн-токены бренда ==== */
+/* ==== Дизайн-токены бренда (из макета reac-ui/chat/globals.css) ==== */
 :root {
-  --brand-bg: #f3f5f9;
+  --brand-bg: #f4f6f9;
   --brand-surface: #ffffff;
-  --brand-border: #e6e9f0;
-  --brand-text: #1c2330;
-  --brand-muted: #8b94a6;
-  --brand-accent: #10b981;
-  --brand-radius: 1.15rem;
+  --brand-border: #d8e0e8;
+  --brand-text: #182230;
+  --brand-muted: #718096;
+  --brand-accent: #16a878;
+  --brand-input: #edf1f5;
+  --brand-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Helvetica, Arial, sans-serif;
 }
 
 .app-wrapper {
@@ -24,6 +26,17 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  font-family: var(--brand-font);
+}
+
+/* Kit жёстко задаёт Helvetica Neue во многих блоках — приводим к Inter. */
+.app-wrapper .cs-main-container,
+.app-wrapper .cs-message,
+.app-wrapper .cs-message__content,
+.app-wrapper .cs-conversation-header,
+.app-wrapper .cs-message-input,
+.app-wrapper .cs-message-input__content-editor {
+  font-family: var(--brand-font) !important;
 }
 
 .app-wrapper .cs-main-container {
@@ -45,7 +58,7 @@
   position: absolute;
   /* Скрепка теперь внутри «пилюли» ввода, поэтому сдвигаем накладку вправо
      и приподнимаем на величину нижнего отступа панели. */
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 1.35rem);
   left: 0.95rem;
   width: 2.9rem;
   height: 2.9rem;
@@ -74,6 +87,29 @@
   box-sizing: border-box !important;
 }
 
+/* Водяной знак с логотипом по центру ленты — как в макете. */
+.app-wrapper .cs-message-list::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(16rem, 70vw);
+  height: min(16rem, 70vw);
+  background-image: url('/gorshok-logo.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.14;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app-wrapper .cs-message-list__scroll-wrapper {
+  z-index: 1;
+}
+
 /* ==== Панель ввода ==== */
 .app-wrapper .cs-message-input {
   width: 100% !important;
@@ -84,10 +120,10 @@
   overflow: hidden !important;
   align-items: center !important;
   gap: 0.6rem !important;
-  background-color: var(--brand-bg) !important;
+  background-color: var(--brand-surface) !important;
   border-top: 1px solid var(--brand-border) !important;
-  padding: 0.75rem 0.9rem !important;
-  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom)) !important;
+  padding: 0.75rem 1.1rem !important;
+  padding-bottom: calc(1.1rem + env(safe-area-inset-bottom)) !important;
 }
 
 .app-wrapper .cs-message-input__content-editor-wrapper {
@@ -96,7 +132,8 @@
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
-  background-color: #e8ebf1 !important;
+  background-color: var(--brand-input) !important;
+  border: 1px solid var(--brand-border) !important;
   border-radius: 2rem !important;
   padding: 0.75rem 1.1rem 0.75rem 3.1rem !important;
   margin: 0 !important;
@@ -144,6 +181,40 @@
   font-size: 1.25rem !important;
 }
 
+/* Иконки из макета (Solar). Штатный FontAwesome-глиф в кнопках kit-а
+   скрываем и рисуем svg-маской, чтобы не форкать компоненты. */
+.app-wrapper .cs-button--attachment svg,
+.app-wrapper .cs-button--send svg {
+  display: none !important;
+}
+
+.app-wrapper .cs-button--attachment::before,
+.app-wrapper .cs-button--send::before {
+  content: '';
+  display: block;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.app-wrapper .cs-button--attachment::before {
+  width: 1.4rem;
+  height: 1.4rem;
+  -webkit-mask-image: url('./assets/icons/attach.svg');
+  mask-image: url('./assets/icons/attach.svg');
+}
+
+.app-wrapper .cs-button--send::before {
+  width: 1.35rem;
+  height: 1.35rem;
+  -webkit-mask-image: url('./assets/icons/send.svg');
+  mask-image: url('./assets/icons/send.svg');
+}
+
 .app-wrapper .cs-button--send {
   flex-shrink: 0 !important;
   display: flex !important;
@@ -159,7 +230,12 @@
   background-color: var(--brand-accent) !important;
   color: #fff !important;
   font-size: 1.15rem !important;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.32);
+  box-shadow: 0 5px 14px rgba(22, 168, 120, 0.28);
+  transition: transform 0.12s ease;
+}
+
+.app-wrapper .cs-button--send:active:not(:disabled) {
+  transform: scale(0.95);
 }
 
 .app-wrapper .cs-button--send:disabled {
@@ -174,33 +250,37 @@
 .app-wrapper .cs-conversation-header {
   flex-shrink: 0 !important;
   align-items: center !important;
-  gap: 0.85rem !important;
-  padding: 0.9rem 1.1rem !important;
+  gap: 0.75rem !important;
+  min-height: 82px !important;
+  padding: 0.9rem 1.25rem !important;
   background-color: var(--brand-surface) !important;
   border-bottom: 1px solid var(--brand-border) !important;
-  box-shadow: 0 1px 12px rgba(28, 35, 48, 0.05);
+  box-shadow: 0 1px 12px rgba(28, 52, 74, 0.05);
 }
 
 .app-wrapper .cs-conversation-header__avatar {
   margin: 0 !important;
   padding: 0 !important;
-  width: 3rem !important;
-  min-width: 3rem !important;
-  height: 3rem !important;
+  width: 2.5rem !important;
+  min-width: 2.5rem !important;
+  height: 2.5rem !important;
 }
 
 .app-wrapper .cs-conversation-header__avatar .cs-avatar,
 .app-wrapper .cs-message__avatar .cs-avatar {
-  width: 3rem !important;
-  height: 3rem !important;
+  width: 2.5rem !important;
+  height: 2.5rem !important;
   border: 1px solid var(--brand-border) !important;
   background-color: var(--brand-surface) !important;
   box-sizing: border-box !important;
 }
 
+.app-wrapper .cs-message__avatar .cs-avatar {
+  box-shadow: 0 2px 8px rgba(28, 52, 74, 0.08) !important;
+}
+
 .app-wrapper .cs-avatar img {
-  object-fit: contain !important;
-  padding: 0.18rem;
+  object-fit: cover !important;
   box-sizing: border-box;
   background-color: var(--brand-surface);
 }
@@ -215,27 +295,48 @@
 }
 
 .brand-title {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--brand-text);
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .brand-subtitle {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.9rem;
+  gap: 0.375rem;
+  font-size: 0.75rem;
   line-height: 1.2;
   color: var(--brand-muted);
 }
 
 .brand-status-dot {
-  width: 0.55rem;
-  height: 0.55rem;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   background-color: var(--brand-accent);
   flex-shrink: 0;
+  animation: brand-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes brand-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-status-dot {
+    animation: none;
+  }
 }
 
 .brand-name {
@@ -270,30 +371,32 @@
   word-break: break-word;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
-  padding: 0.85rem 1.05rem !important;
-  font-size: 1rem !important;
-  line-height: 1.5 !important;
-  border-radius: var(--brand-radius) !important;
+  padding: 1rem 1.25rem !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+  border-radius: 20px !important;
 }
 
 .app-wrapper .cs-message--incoming .cs-message__content {
   background-color: var(--brand-surface) !important;
   color: var(--brand-text) !important;
-  border-bottom-left-radius: 0.35rem !important;
-  box-shadow: 0 2px 14px rgba(28, 35, 48, 0.07);
+  border: 1px solid rgba(216, 224, 232, 0.4) !important;
+  border-top-left-radius: 0.25rem !important;
+  box-shadow: 0 8px 24px rgba(28, 52, 74, 0.07);
 }
 
 .app-wrapper .cs-message--outgoing .cs-message__content {
   background-color: var(--brand-accent) !important;
   color: #fff !important;
-  border-bottom-right-radius: 0.35rem !important;
-  box-shadow: 0 2px 14px rgba(16, 185, 129, 0.24);
+  border-bottom-right-radius: 0.25rem !important;
+  box-shadow: 0 8px 24px rgba(22, 168, 120, 0.22);
 }
 
 /* Подпись времени под «пузырём». */
 .app-wrapper .cs-message__footer {
-  margin-top: 0.3rem !important;
-  font-size: 0.82rem !important;
+  margin-top: 0.5rem !important;
+  padding: 0 0.25rem !important;
+  font-size: 11px !important;
   color: var(--brand-muted) !important;
 }
 
