@@ -88,7 +88,9 @@
   width: 100% !important;
   min-height: 0 !important;
   background-color: var(--brand-bg) !important;
-  padding: 1.1rem 0.9rem 0.4rem !important;
+  /* Горизонтальные отступы живут на .cs-message-list__scroll-wrapper, чтобы
+     полоса прокрутки оставалась вплотную к правому краю. */
+  padding: 1.1rem 0 0.4rem !important;
   box-sizing: border-box !important;
   /* Разделительная линия «лента / панель ввода» (в макете это border-top
      нижней панели). */
@@ -116,6 +118,9 @@
 
 .app-wrapper .cs-message-list__scroll-wrapper {
   z-index: 1;
+  /* px-5 (1.25rem) из макета. Отступы ставятся здесь (а не на message-list),
+     чтобы полоса прокрутки kit-а оставалась вплотную к правому краю. */
+  padding: 0 1.25rem !important;
 }
 
 /* ==== Панель ввода ==== */
@@ -382,7 +387,13 @@
 .app-wrapper .cs-message {
   padding: 0 !important;
   margin-bottom: 1rem !important;
-  max-width: 92% !important;
+  /* Убираем прежний max-width: 92% — он резал сообщения и оставлял пустое
+     место справа. Входящие ограничены аватаром, исходящие — правилом ниже. */
+  max-width: none !important;
+}
+
+.app-wrapper .cs-message--outgoing .cs-message__content-wrapper {
+  max-width: 85% !important;
 }
 
 .app-wrapper .cs-message--incoming .cs-message__avatar {
