@@ -1,3 +1,14 @@
+/* ==== Дизайн-токены бренда ==== */
+:root {
+  --brand-bg: #f3f5f9;
+  --brand-surface: #ffffff;
+  --brand-border: #e6e9f0;
+  --brand-text: #1c2330;
+  --brand-muted: #8b94a6;
+  --brand-accent: #10b981;
+  --brand-radius: 1.15rem;
+}
+
 .app-wrapper {
   position: fixed;
   /* Anchor directly to the visual viewport so the chat stays visible
@@ -9,7 +20,7 @@
   padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) 0
     env(safe-area-inset-left, 0);
   box-sizing: border-box;
-  background-color: #fff;
+  background-color: var(--brand-bg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -32,26 +43,18 @@
      Прямое касание по input открывает iOS-меню "Выбрать фото / Сделать фото"
      без программного .click(), который Safari часто игнорирует. */
   position: absolute;
-  bottom: env(safe-area-inset-bottom, 0);
-  left: 0;
-  width: 3.2rem;
-  height: 3.2rem;
+  /* Скрепка теперь внутри «пилюли» ввода, поэтому сдвигаем накладку вправо
+     и приподнимаем на величину нижнего отступа панели. */
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+  left: 0.95rem;
+  width: 2.9rem;
+  height: 2.9rem;
   opacity: 0;
   cursor: pointer;
-  z-index: 20;
+  z-index: 30;
   /* У file input в WebKit свой шрифт по умолчанию; для rem-размеров
      приводим его к размеру root, чтобы совпадало с кнопкой. */
   font-size: 1rem;
-}
-
-/* Подгоняем стандартную кнопку под размер прозрачной «насадки». */
-.app-wrapper .cs-button--attachment {
-  width: 3rem !important;
-  min-width: 3rem !important;
-  max-width: 3rem !important;
-  height: 3rem !important;
-  padding: 0 !important;
-  box-sizing: border-box !important;
 }
 
 .app-wrapper .cs-chat-container {
@@ -66,8 +69,12 @@
   flex: 1 1 auto !important;
   width: 100% !important;
   min-height: 0 !important;
+  background-color: var(--brand-bg) !important;
+  padding: 1.1rem 0.9rem 0.4rem !important;
+  box-sizing: border-box !important;
 }
 
+/* ==== Панель ввода ==== */
 .app-wrapper .cs-message-input {
   width: 100% !important;
   max-width: 100% !important;
@@ -75,7 +82,12 @@
   flex-shrink: 0 !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
-  padding-bottom: env(safe-area-inset-bottom) !important;
+  align-items: center !important;
+  gap: 0.6rem !important;
+  background-color: var(--brand-bg) !important;
+  border-top: 1px solid var(--brand-border) !important;
+  padding: 0.75rem 0.9rem !important;
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom)) !important;
 }
 
 .app-wrapper .cs-message-input__content-editor-wrapper {
@@ -84,6 +96,10 @@
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
+  background-color: #e8ebf1 !important;
+  border-radius: 2rem !important;
+  padding: 0.75rem 1.1rem 0.75rem 3.1rem !important;
+  margin: 0 !important;
 }
 
 .app-wrapper .cs-message-input__content-editor {
@@ -94,23 +110,159 @@
   box-sizing: border-box !important;
   font-size: 16px !important;
   line-height: 1.35em !important;
-  background-color: #c6e3fa;
+  background-color: transparent !important;
+  color: var(--brand-text) !important;
   -webkit-text-size-adjust: 100%;
 }
 
 .app-wrapper .cs-message-input__tools {
   flex-shrink: 0 !important;
   display: flex !important;
-  align-items: flex-end !important;
+  align-items: center !important;
+}
+
+/* Скрепка «вкладывается» внутрь пилюли ввода — первый блок tools
+   абсолютно позиционируем на левый отступ поля. */
+.app-wrapper .cs-message-input {
+  position: relative;
+}
+
+.app-wrapper .cs-message-input__tools:first-child {
+  position: absolute !important;
+  left: 1.2rem;
+  z-index: 10;
+}
+
+.app-wrapper .cs-button--attachment {
+  width: 2.4rem !important;
+  min-width: 2.4rem !important;
+  max-width: 2.4rem !important;
+  height: 2.4rem !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  color: var(--brand-muted) !important;
+  font-size: 1.25rem !important;
 }
 
 .app-wrapper .cs-button--send {
   flex-shrink: 0 !important;
-  width: 2.5em !important;
-  min-width: 2.5em !important;
-  max-width: 2.5em !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 3.4rem !important;
+  min-width: 3.4rem !important;
+  max-width: 3.4rem !important;
+  height: 3.4rem !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+  background-color: var(--brand-accent) !important;
+  color: #fff !important;
+  font-size: 1.15rem !important;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.32);
+}
+
+.app-wrapper .cs-button--send:disabled {
+  opacity: 0.45 !important;
+}
+
+.app-wrapper .cs-message-input__content-editor[data-placeholder]:empty::before {
+  color: var(--brand-muted) !important;
+}
+
+/* ==== Шапка диалога ==== */
+.app-wrapper .cs-conversation-header {
+  flex-shrink: 0 !important;
+  align-items: center !important;
+  gap: 0.85rem !important;
+  padding: 0.9rem 1.1rem !important;
+  background-color: var(--brand-surface) !important;
+  border-bottom: 1px solid var(--brand-border) !important;
+  box-shadow: 0 1px 12px rgba(28, 35, 48, 0.05);
+}
+
+.app-wrapper .cs-conversation-header__avatar {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 3rem !important;
+  min-width: 3rem !important;
+  height: 3rem !important;
+}
+
+.app-wrapper .cs-conversation-header__avatar .cs-avatar,
+.app-wrapper .cs-message__avatar .cs-avatar {
+  width: 3rem !important;
+  height: 3rem !important;
+  border: 1px solid var(--brand-border) !important;
+  background-color: var(--brand-surface) !important;
+  box-sizing: border-box !important;
+}
+
+.app-wrapper .cs-avatar img {
+  object-fit: contain !important;
+  padding: 0.18rem;
+  box-sizing: border-box;
+  background-color: var(--brand-surface);
+}
+
+.app-wrapper .cs-conversation-header__content {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.2rem !important;
+  min-width: 0 !important;
+}
+
+.brand-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--brand-text);
+  line-height: 1.2;
+}
+
+.brand-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  color: var(--brand-muted);
+}
+
+.brand-status-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background-color: var(--brand-accent);
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--brand-muted);
+}
+
+.brand-separator {
+  color: var(--brand-border);
+}
+
+/* ==== Лента сообщений ==== */
+.app-wrapper .cs-message {
+  padding: 0 !important;
+  margin-bottom: 1rem !important;
+  max-width: 92% !important;
+}
+
+.app-wrapper .cs-message--incoming .cs-message__avatar {
+  margin-right: 0.7rem !important;
+  padding: 0 !important;
+  align-self: flex-start !important;
+}
+
+.app-wrapper .cs-message__content-wrapper {
+  min-width: 0 !important;
 }
 
 .app-wrapper .cs-message__content {
@@ -118,13 +270,44 @@
   word-break: break-word;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
+  padding: 0.85rem 1.05rem !important;
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+  border-radius: var(--brand-radius) !important;
+}
+
+.app-wrapper .cs-message--incoming .cs-message__content {
+  background-color: var(--brand-surface) !important;
+  color: var(--brand-text) !important;
+  border-bottom-left-radius: 0.35rem !important;
+  box-shadow: 0 2px 14px rgba(28, 35, 48, 0.07);
+}
+
+.app-wrapper .cs-message--outgoing .cs-message__content {
+  background-color: var(--brand-accent) !important;
+  color: #fff !important;
+  border-bottom-right-radius: 0.35rem !important;
+  box-shadow: 0 2px 14px rgba(16, 185, 129, 0.24);
+}
+
+/* Подпись времени под «пузырём». */
+.app-wrapper .cs-message__footer {
+  margin-top: 0.3rem !important;
+  font-size: 0.82rem !important;
+  color: var(--brand-muted) !important;
+}
+
+.app-wrapper .cs-message--outgoing .cs-message__footer {
+  justify-content: flex-end !important;
+}
+
+.app-wrapper .cs-message__image-content {
+  padding: 0 !important;
 }
 
 .app-wrapper .cs-message__image-content img {
   display: block;
   max-width: 100%;
   height: auto;
-  border-radius: 0.5em;
+  border-radius: 0.85em;
 }
-
-

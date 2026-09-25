@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import {
   MainContainer,
   ChatContainer,
+  ConversationHeader,
+  Avatar,
   MessageList,
   Message,
   MessageInput,
@@ -10,6 +12,14 @@ import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import './App.css';
 
 const FILE_INPUT_ID = 'chat-file-input';
+
+// Логотип бренда (лежит в public/), используется в шапке и у аватара бота.
+const BRAND_LOGO = '/pwa-512x512.png';
+const BRAND_TITLE = 'Подбор компрессора';
+const BRAND_NAME = 'GORSHOK';
+const BRAND_STATUS = 'Онлайн';
+// Единая подпись времени под сообщениями.
+const SENT_TIME = 'Только что';
 
 const WEBHOOK_URL =
   'https://main-production-a2c6.up.railway.app/webhook/compressorSelect';
@@ -144,7 +154,7 @@ function App() {
                   ...prev,
                   {
                     message: 'Не удалось обработать вставленное изображение.',
-                    sentTime: 'just now',
+                    sentTime: SENT_TIME,
                     sender: 'assistant',
                     direction: 'incoming',
                     position: 'single',
@@ -171,7 +181,7 @@ function App() {
   const [messages, setMessages] = useState([
     {
       message: 'Здравствуйте! Опишите вашу задачу, и я подберу компрессор.',
-      sentTime: 'just now',
+      sentTime: SENT_TIME,
       sender: 'assistant',
       direction: 'incoming',
       position: 'single',
@@ -190,7 +200,7 @@ function App() {
 
     const userMessage = {
       message: caption,
-      sentTime: 'just now',
+      sentTime: SENT_TIME,
       sender: 'user',
       direction: 'outgoing',
       position: 'single',
@@ -210,7 +220,7 @@ function App() {
       {
         id: loadingId,
         message: '…',
-        sentTime: 'just now',
+        sentTime: SENT_TIME,
         sender: 'assistant',
         direction: 'incoming',
         position: 'single',
@@ -245,7 +255,7 @@ function App() {
           m.id === loadingId
             ? {
                 message: replyText,
-                sentTime: 'just now',
+                sentTime: SENT_TIME,
                 sender: 'assistant',
                 direction: 'incoming',
                 position: 'single',
@@ -260,7 +270,7 @@ function App() {
           m.id === loadingId
             ? {
                 message: `Ошибка: ${error.message}. Проверьте, что workflow в n8n активен и CORS настроен.`,
-                sentTime: 'just now',
+                sentTime: SENT_TIME,
                 sender: 'assistant',
                 direction: 'incoming',
                 position: 'single',
@@ -281,7 +291,7 @@ function App() {
         ...prev,
         {
           message: 'Можно прикреплять только изображения.',
-          sentTime: 'just now',
+          sentTime: SENT_TIME,
           sender: 'assistant',
           direction: 'incoming',
           position: 'single',
@@ -300,7 +310,7 @@ function App() {
         {
           message:
             'Не удалось обработать изображение. Попробуйте другое фото.',
-          sentTime: 'just now',
+          sentTime: SENT_TIME,
           sender: 'assistant',
           direction: 'incoming',
           position: 'single',
@@ -311,7 +321,7 @@ function App() {
 
     const userImageMessage = {
       message: '',
-      sentTime: 'just now',
+      sentTime: SENT_TIME,
       sender: 'user',
       direction: 'outgoing',
       position: 'single',
@@ -325,7 +335,7 @@ function App() {
       {
         id: loadingId,
         message: '…',
-        sentTime: 'just now',
+        sentTime: SENT_TIME,
         sender: 'assistant',
         direction: 'incoming',
         position: 'single',
@@ -357,7 +367,7 @@ function App() {
           m.id === loadingId
             ? {
                 message: replyText,
-                sentTime: 'just now',
+                sentTime: SENT_TIME,
                 sender: 'assistant',
                 direction: 'incoming',
                 position: 'single',
@@ -372,7 +382,7 @@ function App() {
           m.id === loadingId
             ? {
                 message: `Ошибка: ${error.message}. Проверьте, что workflow в n8n активен и CORS настроен.`,
-                sentTime: 'just now',
+                sentTime: SENT_TIME,
                 sender: 'assistant',
                 direction: 'incoming',
                 position: 'single',
@@ -387,15 +397,31 @@ function App() {
     <div className="app-wrapper">
       <MainContainer>
         <ChatContainer>
+          <ConversationHeader>
+            <Avatar name={BRAND_NAME} src={BRAND_LOGO} />
+            <ConversationHeader.Content>
+              <span className="brand-title">{BRAND_TITLE}</span>
+              <span className="brand-subtitle">
+                <span className="brand-status-dot" aria-hidden="true" />
+                <span className="brand-name">{BRAND_NAME}</span>
+                <span className="brand-separator">·</span>
+                <span className="brand-status">{BRAND_STATUS}</span>
+              </span>
+            </ConversationHeader.Content>
+          </ConversationHeader>
           <MessageList>
             {messages.map((m, i) => (
-              <Message key={m.id ?? i} model={m}>
+              <Message key={m.id ?? i} model={m} avatarPosition="tl">
+                {m.direction === 'incoming' && (
+                  <Avatar name={BRAND_NAME} src={BRAND_LOGO} />
+                )}
                 {m.image && (
                   <Message.ImageContent
                     src={m.image}
                     alt="Прикреплённое фото"
                   />
                 )}
+                <Message.Footer sentTime={m.sentTime} />
               </Message>
             ))}
           </MessageList>
