@@ -56,12 +56,14 @@
      Прямое касание по input открывает iOS-меню "Выбрать фото / Сделать фото"
      без программного .click(), который Safari часто игнорирует. */
   position: absolute;
-  /* Скрепка теперь внутри «пилюли» ввода, поэтому сдвигаем накладку вправо
-     и приподнимаем на величину нижнего отступа панели. */
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 1.35rem);
-  left: 0.95rem;
-  width: 2.9rem;
-  height: 2.9rem;
+  /* Скрепка — первый элемент внутри «пилюли» ввода:
+     слева = padding панели (1.25rem) + рамка (1px) + padding пилюли (1rem);
+     снизу = нижний padding панели (1.5rem) + половина разницы высот пилюли
+     и кнопки скрепки. */
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 2.125rem);
+  left: 2.25rem;
+  width: 2.25rem;
+  height: 2.25rem;
   opacity: 0;
   cursor: pointer;
   z-index: 30;
@@ -76,6 +78,9 @@
   min-width: 0 !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
+  /* Белый фон «нижней панели» (bg-card): он виден сквозь внешние отступы
+     пилюли ввода и образует полноширинную белую полосу под лентой. */
+  background-color: var(--brand-surface) !important;
 }
 
 .app-wrapper .cs-message-list {
@@ -85,6 +90,9 @@
   background-color: var(--brand-bg) !important;
   padding: 1.1rem 0.9rem 0.4rem !important;
   box-sizing: border-box !important;
+  /* Разделительная линия «лента / панель ввода» (в макете это border-top
+     нижней панели). */
+  border-bottom: 1px solid var(--brand-border) !important;
 }
 
 /* Водяной знак с логотипом по центру ленты — как в макете. */
@@ -111,32 +119,50 @@
 }
 
 /* ==== Панель ввода ==== */
+/* Нижняя белая панель (bg-card) формируется фоном .cs-chat-container, который
+   виден сквозь внешние отступы «пилюли». Сама строка ввода — одна «пилюля»:
+   rounded-full bg-input, внутри скрепка + поле + круглая кнопка отправки. */
 .app-wrapper .cs-message-input {
-  width: 100% !important;
-  max-width: 100% !important;
+  position: relative;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  width: auto !important;
+  max-width: none !important;
   min-width: 0 !important;
   flex-shrink: 0 !important;
   box-sizing: border-box !important;
-  overflow: hidden !important;
-  align-items: center !important;
-  gap: 0.6rem !important;
-  background-color: var(--brand-surface) !important;
-  border-top: 1px solid var(--brand-border) !important;
-  padding: 0.75rem 1.1rem !important;
-  padding-bottom: calc(1.1rem + env(safe-area-inset-bottom)) !important;
+  /* Тень круглой кнопки отправки должна выходить за пределы пилюли. */
+  overflow: visible !important;
+  /* Внешние отступы = padding нижней панели в макете: px-5 pt-3 pb-6
+     (1.25rem / 0.75rem / 1.5rem) + safe-area снизу. */
+  margin: 0.75rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px)) !important;
+  padding: 0.375rem 0.375rem 0.375rem 1rem !important;
+  background-color: var(--brand-input) !important;
+  border: 1px solid rgba(216, 224, 232, 0.7) !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 1px 2px rgba(28, 52, 74, 0.04) !important;
 }
 
+/* Поле ввода прозрачное — фон даёт «пилюля». */
 .app-wrapper .cs-message-input__content-editor-wrapper {
   flex: 1 1 auto !important;
   min-width: 0 !important;
-  width: 100% !important;
+  width: auto !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
-  background-color: var(--brand-input) !important;
-  border: 1px solid var(--brand-border) !important;
-  border-radius: 2rem !important;
-  padding: 0.75rem 1.1rem 0.75rem 3.1rem !important;
+  background-color: transparent !important;
+  border: 0 none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
   margin: 0 !important;
+}
+
+/* У kit-а у контейнера редактора свой голубой фон (#c6e3fa) — убираем. */
+.app-wrapper .cs-message-input__content-editor-container {
+  background-color: transparent !important;
+  padding: 0 !important;
+  max-height: 5.4em !important;
 }
 
 .app-wrapper .cs-message-input__content-editor {
@@ -145,8 +171,10 @@
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
+  padding: 0 !important;
+  /* 16px — чтобы iOS Safari не зумил страницу при фокусе. */
   font-size: 16px !important;
-  line-height: 1.35em !important;
+  line-height: 1.4em !important;
   background-color: transparent !important;
   color: var(--brand-text) !important;
   -webkit-text-size-adjust: 100%;
@@ -158,27 +186,29 @@
   align-items: center !important;
 }
 
-/* Скрепка «вкладывается» внутрь пилюли ввода — первый блок tools
-   абсолютно позиционируем на левый отступ поля. */
-.app-wrapper .cs-message-input {
-  position: relative;
-}
-
-.app-wrapper .cs-message-input__tools:first-child {
-  position: absolute !important;
-  left: 1.2rem;
-  z-index: 10;
+/* Kit прижимает кнопки к низу (align-self: flex-end) — центрируем в пилюле. */
+.app-wrapper .cs-message-input__tools .cs-button--attachment,
+.app-wrapper .cs-message-input__tools .cs-button--send {
+  align-self: center !important;
+  margin: 0 !important;
 }
 
 .app-wrapper .cs-button--attachment {
-  width: 2.4rem !important;
-  min-width: 2.4rem !important;
-  max-width: 2.4rem !important;
-  height: 2.4rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 2.25rem !important;
+  min-width: 2.25rem !important;
+  max-width: 2.25rem !important;
+  height: 2.25rem !important;
   padding: 0 !important;
   box-sizing: border-box !important;
   color: var(--brand-muted) !important;
-  font-size: 1.25rem !important;
+  transition: color 0.12s ease;
+}
+
+.app-wrapper .cs-button--attachment:hover {
+  color: var(--brand-text) !important;
 }
 
 /* Иконки из макета (Solar). Штатный FontAwesome-глиф в кнопках kit-а
@@ -202,15 +232,15 @@
 }
 
 .app-wrapper .cs-button--attachment::before {
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 1.25rem;
+  height: 1.25rem;
   -webkit-mask-image: url('./assets/icons/attach.svg');
   mask-image: url('./assets/icons/attach.svg');
 }
 
 .app-wrapper .cs-button--send::before {
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 1.25rem;
+  height: 1.25rem;
   -webkit-mask-image: url('./assets/icons/send.svg');
   mask-image: url('./assets/icons/send.svg');
 }
@@ -220,17 +250,16 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  width: 3.4rem !important;
-  min-width: 3.4rem !important;
-  max-width: 3.4rem !important;
-  height: 3.4rem !important;
+  width: 2.75rem !important;
+  min-width: 2.75rem !important;
+  max-width: 2.75rem !important;
+  height: 2.75rem !important;
   padding: 0 !important;
   margin: 0 !important;
   border-radius: 50% !important;
   background-color: var(--brand-accent) !important;
   color: #fff !important;
-  font-size: 1.15rem !important;
-  box-shadow: 0 5px 14px rgba(22, 168, 120, 0.28);
+  box-shadow: 0 5px 14px rgba(22, 168, 120, 0.28) !important;
   transition: transform 0.12s ease;
 }
 
