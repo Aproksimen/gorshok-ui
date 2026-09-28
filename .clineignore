@@ -1,0 +1,66 @@
+# ─── Зависимости ─────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ─── Сборка ──────────────────────────────────
+dist/
+build/
+out/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+
+# ─── Логи и временные файлы ──────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.tmp
+*.temp
+
+# ─── Кэши и метаданные ───────────────────────
+.vite/
+.eslintcache
+.stylelintcache
+.npm/
+.yarn/
+
+# ─── Окружение и секреты ─────────────────────
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ─── Редакторы и ОС ──────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ─── Тесты и покрытие ────────────────────────
+coverage/
+.nyc_output/
+
+# ─── Специфика проекта ───────────────────────
+# Тяжёлые медиа (если их много и они не нужны в контексте)
+# *.png
+# *.jpg
+# *.jpeg
+# *.svg
+# *.mp4
+
+# Документация и служебные файлы
+docs/
+README.md
+LICENSE
+CHANGELOG.md

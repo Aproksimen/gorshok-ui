@@ -27,3 +27,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Draft design reference (scratch — not part of the app)
+reac-ui/
