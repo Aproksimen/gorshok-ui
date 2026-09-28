@@ -251,6 +251,12 @@
   background-color: var(--brand-surface);
 }
 
+/* При открытой клавиатуре home-индикатор закрыт самой клавиатурой, поэтому
+   нижний safe-area-отступ не нужен — поле ввода встаёт вплотную к клавиатуре. */
+.app-wrapper--keyboard .chat-input {
+  padding-bottom: 0.5rem;
+}
+
 .chat-input__pill {
   display: flex;
   align-items: center;

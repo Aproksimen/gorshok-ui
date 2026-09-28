@@ -27,7 +27,7 @@ function App() {
 
   return (
     <div
-      className="app-wrapper"
+      className={`app-wrapper${viewport.keyboardVisible ? ' app-wrapper--keyboard' : ''}`}
       style={{
         top: `${viewport.top}px`,
         left: `${viewport.left}px`,

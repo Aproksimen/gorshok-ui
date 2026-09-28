@@ -40,21 +40,30 @@ describe('useVisualViewport', () => {
       left: 0,
       height: window.innerHeight,
       width: window.innerWidth,
+      keyboardVisible: false,
     });
   });
 
   it('reads offsets and size from visualViewport', () => {
     const { viewport } = makeVisualViewport();
     defineVisualViewport(viewport);
+    Object.defineProperty(window, 'innerHeight', { value: 600, configurable: true });
 
     const { result } = renderHook(() => useVisualViewport());
 
-    expect(result.current).toEqual({ top: 10, left: 5, height: 600, width: 400 });
+    expect(result.current).toEqual({
+      top: 10,
+      left: 5,
+      height: 600,
+      width: 400,
+      keyboardVisible: false,
+    });
   });
 
   it('updates on visualViewport resize', () => {
     const { viewport, listeners } = makeVisualViewport();
     defineVisualViewport(viewport);
+    Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
 
     const { result } = renderHook(() => useVisualViewport());
 
@@ -64,7 +73,13 @@ describe('useVisualViewport', () => {
       listeners['resize']?.();
     });
 
-    expect(result.current).toEqual({ top: 99, left: 5, height: 500, width: 400 });
+    expect(result.current).toEqual({
+      top: 99,
+      left: 5,
+      height: 500,
+      width: 400,
+      keyboardVisible: true,
+    });
   });
 
   it('updates on window resize when visualViewport is absent', () => {
@@ -80,5 +95,20 @@ describe('useVisualViewport', () => {
     });
 
     expect(result.current.height).toBe(900);
+  });
+
+  it('reports keyboardVisible when the visual viewport shrinks below the layout viewport', () => {
+    const { viewport, listeners } = makeVisualViewport(); // height: 600
+    defineVisualViewport(viewport);
+    Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
+
+    const { result } = renderHook(() => useVisualViewport());
+    expect(result.current.keyboardVisible).toBe(true);
+
+    act(() => {
+      viewport.height = 800;
+      listeners['resize']?.();
+    });
+    expect(result.current.keyboardVisible).toBe(false);
   });
 });

@@ -5,7 +5,12 @@ export interface Viewport {
   left: number;
   height: number;
   width: number;
+  keyboardVisible: boolean;
 }
+
+// Порог, отличающий открытие клавиатуры (~300px) от показа/скрытия адресной
+// строки Safari (~50–90px). Используется для определения keyboardVisible.
+const KEYBOARD_THRESHOLD_PX = 150;
 
 // Возвращает актуальные размеры visual viewport (важно на iOS при открытии
 // клавиатуры). Применяется через inline-стиль, без прямой записи в DOM.
@@ -16,6 +21,10 @@ function getViewport(): Viewport {
     left: vv ? vv.offsetLeft : 0,
     height: vv ? vv.height : window.innerHeight,
     width: vv ? vv.width : window.innerWidth,
+    // Клавиатура открыта, когда визуальный вьюпорт заметно сжался относительно
+    // layout-вьюпорта: на iOS layout-вьюпорт (window.innerHeight) при открытии
+    // клавиатуры не меняется, а visualViewport.height уменьшается.
+    keyboardVisible: vv ? window.innerHeight - vv.height > KEYBOARD_THRESHOLD_PX : false,
   };
 }
 
