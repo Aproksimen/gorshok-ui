@@ -2,9 +2,10 @@ import { useCallback, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { sendToWebhook, isTimeoutError } from '../api/webhook';
 import type { WebhookPayload } from '../api/webhook';
-import { PENDING_IMAGE_PLACEHOLDER, SENT_TIME } from '../constants';
+import { LOADING_TEXT, PENDING_IMAGE_PLACEHOLDER } from '../constants';
 import type { Message } from '../types';
 import { fileToJpegDataUrl } from '../utils/image';
+import { formatTime } from '../utils/time';
 
 function makeId(): string {
   return typeof crypto !== 'undefined' && crypto.randomUUID
@@ -15,7 +16,7 @@ function makeId(): string {
 function makeMessage(overrides: Partial<Message> & { message: string }): Message {
   return {
     id: makeId(),
-    sentTime: SENT_TIME,
+    sentTime: formatTime(new Date()),
     sender: 'assistant',
     direction: 'incoming',
     position: 'single',
@@ -106,7 +107,7 @@ export function useChat(): UseChatResult {
       setPendingImage(null);
     }
 
-    const loadingMessage = makeMessage({ message: '…' });
+    const loadingMessage = makeMessage({ message: LOADING_TEXT });
     addMessage(loadingMessage);
 
     const payload: WebhookPayload = imageToSend
@@ -156,7 +157,7 @@ export function useChat(): UseChatResult {
         })
       );
 
-      const loadingMessage = makeMessage({ message: '…' });
+      const loadingMessage = makeMessage({ message: LOADING_TEXT });
       addMessage(loadingMessage);
 
       const base64 = imageDataUrl.slice(imageDataUrl.indexOf(',') + 1);

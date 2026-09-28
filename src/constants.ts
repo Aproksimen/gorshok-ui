@@ -8,8 +8,8 @@ export const BRAND_TITLE = 'Подбор компрессора';
 export const BRAND_NAME = 'GORSHOK';
 export const BRAND_STATUS = 'Онлайн';
 
-// Единая подпись времени под сообщениями.
-export const SENT_TIME = 'Только что';
+// Подпись в пузыре-заглушке, пока ассистент «печатает».
+export const LOADING_TEXT = '…';
 
 // Обработка изображений.
 export const MAX_IMAGE_DIMENSION = 1920;

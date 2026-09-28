@@ -37,6 +37,7 @@ describe('useChat', () => {
 
     expect(result.current.messages).toHaveLength(1);
     expect(result.current.messages[0].message).toContain('Здравствуйте');
+    expect(result.current.messages[0].sentTime).toBeTruthy();
     expect(result.current.inputValue).toBe('');
     expect(result.current.sendDisabled).toBe(true);
   });
