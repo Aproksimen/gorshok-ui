@@ -65,9 +65,7 @@ export function useChat(): UseChatResult {
         console.error('Webhook error:', error);
         const message = isTimeoutError(error)
           ? 'Сервер не ответил вовремя. Попробуйте ещё раз.'
-          : `Ошибка: ${
-              error instanceof Error ? error.message : String(error)
-            }. Проверьте, что workflow в n8n активен и CORS настроен.`;
+          : 'Не удалось отправить сообщение. Попробуйте ещё раз.';
         patchMessage(loadingId, { message });
       }
     },

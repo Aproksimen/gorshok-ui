@@ -97,7 +97,7 @@ describe('useChat', () => {
   });
 
   it('shows a generic error message when the request fails', async () => {
-    mocks.sendToWebhook.mockRejectedValue(new Error('boom'));
+    mocks.sendToWebhook.mockRejectedValue(new Error('VITE_WEBHOOK_URL не задана (см. .env.example)'));
     const { result } = renderHook(() => useChat());
 
     act(() => result.current.handleInputChange('hi'));
@@ -105,7 +105,11 @@ describe('useChat', () => {
       await result.current.handleSend();
     });
 
-    expect(result.current.messages[2].message).toContain('Ошибка: boom');
+    const { message } = result.current.messages[2];
+    expect(message).toContain('Не удалось отправить сообщение');
+    expect(message).not.toContain('VITE_WEBHOOK_URL');
+    expect(message).not.toContain('n8n');
+    expect(message).not.toContain('CORS');
   });
 
   it('sets the pending image placeholder on paste', () => {
