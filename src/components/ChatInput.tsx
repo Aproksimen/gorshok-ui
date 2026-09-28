@@ -20,6 +20,7 @@ export default function ChatInput({
   sendDisabled,
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   // Авторастягивание поля под содержимое (с ограничением max-height в CSS).
   useEffect(() => {
@@ -38,13 +39,23 @@ export default function ChatInput({
     }
   };
 
+  const handleAttachKeyDown = (event: KeyboardEvent<HTMLLabelElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      inputRef.current?.click();
+    }
+  };
+
   return (
     <footer className="chat-input">
       <div className="chat-input__pill">
         <label
           className="chat-input__attach"
           htmlFor={FILE_INPUT_ID}
+          role="button"
+          tabIndex={0}
           aria-label="Прикрепить файл"
+          onKeyDown={handleAttachKeyDown}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -63,15 +74,18 @@ export default function ChatInput({
           </svg>
         </label>
         <input
+          ref={inputRef}
           id={FILE_INPUT_ID}
           type="file"
           accept="image/*"
           className="chat-input__file"
           onChange={onAttach}
+          tabIndex={-1}
         />
         <textarea
           ref={textareaRef}
           className="chat-input__editor"
+          aria-label="Сообщение"
           value={value}
           onChange={(event) => onInputChange(event.target.value)}
           onKeyDown={handleKeyDown}

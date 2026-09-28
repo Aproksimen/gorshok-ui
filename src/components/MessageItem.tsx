@@ -1,4 +1,4 @@
-import { BRAND_LOGO, BRAND_NAME } from '../constants';
+import { BRAND_LOGO, BRAND_NAME, LOADING_TEXT } from '../constants';
 import type { Message } from '../types';
 
 interface MessageItemProps {
@@ -7,6 +7,7 @@ interface MessageItemProps {
 
 export default function MessageItem({ message }: MessageItemProps) {
   const incoming = message.direction === 'incoming';
+  const isTyping = message.message === LOADING_TEXT;
 
   return (
     <div
@@ -24,7 +25,14 @@ export default function MessageItem({ message }: MessageItemProps) {
           </div>
         )}
         {message.message && (
-          <div className="message__bubble">{message.message}</div>
+          <div
+            className="message__bubble"
+            {...(isTyping
+              ? { role: 'status', 'aria-label': 'Ассистент печатает' }
+              : {})}
+          >
+            {message.message}
+          </div>
         )}
         <div className="message__time">{message.sentTime}</div>
       </div>

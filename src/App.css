@@ -337,3 +337,21 @@
   opacity: 0.45;
   cursor: default;
 }
+
+/* ==== Доступность: видимый фокус ==== */
+.chat-input__attach:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 2px;
+  border-radius: 50%;
+  color: var(--brand-text);
+}
+
+.chat-input__send:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 2px;
+}
+
+.chat-input__editor:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 2px;
+}
