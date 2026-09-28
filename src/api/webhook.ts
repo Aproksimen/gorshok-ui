@@ -2,11 +2,26 @@ const WEBHOOK_URL = import.meta.env.VITE_WEBHOOK_URL;
 
 const DEFAULT_TIMEOUT_MS = 30000;
 
-export function isTimeoutError(error) {
-  return error?.name === 'AbortError';
+export interface WebhookPayload {
+  message: string;
+  image?: string;
+  imageMimeType?: string;
 }
 
-export async function sendToWebhook(payload, { timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
+export interface WebhookResponse {
+  reply?: string;
+  response?: string;
+  [key: string]: unknown;
+}
+
+export function isTimeoutError(error: unknown): boolean {
+  return error instanceof Error && error.name === 'AbortError';
+}
+
+export async function sendToWebhook(
+  payload: WebhookPayload,
+  { timeoutMs = DEFAULT_TIMEOUT_MS }: { timeoutMs?: number } = {}
+): Promise<WebhookResponse> {
   if (!WEBHOOK_URL) {
     throw new Error('VITE_WEBHOOK_URL не задана (см. .env.example)');
   }
@@ -26,7 +41,7 @@ export async function sendToWebhook(payload, { timeoutMs = DEFAULT_TIMEOUT_MS } 
       throw new Error(`HTTP ${response.status}`);
     }
 
-    return await response.json();
+    return (await response.json()) as WebhookResponse;
   } finally {
     clearTimeout(timeout);
   }

@@ -1,6 +1,11 @@
 import { BRAND_LOGO, BRAND_NAME } from '../constants';
+import type { Message } from '../types';
 
-export default function MessageItem({ message }) {
+interface MessageItemProps {
+  message: Message;
+}
+
+export default function MessageItem({ message }: MessageItemProps) {
   const incoming = message.direction === 'incoming';
 
   return (

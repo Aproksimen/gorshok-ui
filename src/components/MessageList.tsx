@@ -1,6 +1,11 @@
 import MessageItem from './MessageItem';
+import type { Message } from '../types';
 
-export default function MessageList({ messages }) {
+interface MessageListProps {
+  messages: Message[];
+}
+
+export default function MessageList({ messages }: MessageListProps) {
   return (
     <main className="chat-messages" aria-live="polite">
       <div className="chat-messages__scroll">

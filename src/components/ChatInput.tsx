@@ -1,5 +1,15 @@
 import { useEffect, useRef } from 'react';
+import type { ChangeEvent, ClipboardEvent, KeyboardEvent } from 'react';
 import { FILE_INPUT_ID } from '../constants';
+
+interface ChatInputProps {
+  value: string;
+  onInputChange: (text: string) => void;
+  onSend: () => void;
+  onAttach: (event: ChangeEvent<HTMLInputElement>) => void;
+  onPaste: (event: ClipboardEvent<HTMLTextAreaElement>) => void;
+  sendDisabled: boolean;
+}
 
 export default function ChatInput({
   value,
@@ -8,8 +18,8 @@ export default function ChatInput({
   onAttach,
   onPaste,
   sendDisabled,
-}) {
-  const textareaRef = useRef(null);
+}: ChatInputProps) {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Авторастягивание поля под содержимое (с ограничением max-height в CSS).
   useEffect(() => {
@@ -19,7 +29,7 @@ export default function ChatInput({
     el.style.height = `${el.scrollHeight}px`;
   }, [value]);
 
-  const handleKeyDown = (event) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       if (!sendDisabled) {

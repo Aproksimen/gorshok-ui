@@ -1,15 +1,18 @@
 import { useCallback, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import { sendToWebhook, isTimeoutError } from '../api/webhook';
+import type { WebhookPayload } from '../api/webhook';
 import { PENDING_IMAGE_PLACEHOLDER, SENT_TIME } from '../constants';
+import type { Message } from '../types';
 import { fileToJpegDataUrl } from '../utils/image';
 
-function makeId() {
+function makeId(): string {
   return typeof crypto !== 'undefined' && crypto.randomUUID
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function makeMessage(overrides = {}) {
+function makeMessage(overrides: Partial<Message> & { message: string }): Message {
   return {
     id: makeId(),
     sentTime: SENT_TIME,
@@ -20,29 +23,38 @@ function makeMessage(overrides = {}) {
   };
 }
 
-const INITIAL_MESSAGE = makeMessage({
+const INITIAL_MESSAGE: Message = makeMessage({
   message: 'Здравствуйте! Опишите вашу задачу, и я подберу компрессор.',
 });
 
-export function useChat() {
-  const [messages, setMessages] = useState([INITIAL_MESSAGE]);
-  const [inputValue, setInputValue] = useState('');
-  const [pendingImage, setPendingImage] = useState(null);
+export interface UseChatResult {
+  messages: Message[];
+  inputValue: string;
+  sendDisabled: boolean;
+  handleInputChange: (text: string) => void;
+  handleSend: () => Promise<void>;
+  handleFileChange: (event: ChangeEvent<HTMLInputElement>) => Promise<void>;
+  handlePasteImage: (dataUrl: string) => void;
+  handlePasteError: () => void;
+}
 
-  const addMessage = useCallback((message) => {
+export function useChat(): UseChatResult {
+  const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
+  const [inputValue, setInputValue] = useState('');
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
+
+  const addMessage = useCallback((message: Message) => {
     setMessages((prev) => [...prev, message]);
   }, []);
 
-  const patchMessage = useCallback((id, patch) => {
+  const patchMessage = useCallback((id: string, patch: Partial<Message>) => {
     setMessages((prev) =>
       prev.map((m) => (m.id === id ? { ...m, ...patch } : m))
     );
   }, []);
 
-  // Единая точка сетевого запроса: убирает дублирование между отправкой
-  // текста и отправкой картинки.
   const requestReply = useCallback(
-    async (loadingId, payload) => {
+    async (loadingId: string, payload: WebhookPayload): Promise<void> => {
       try {
         const data = await sendToWebhook(payload);
         const replyText =
@@ -52,18 +64,18 @@ export function useChat() {
         console.error('Webhook error:', error);
         const message = isTimeoutError(error)
           ? 'Сервер не ответил вовремя. Попробуйте ещё раз.'
-          : `Ошибка: ${error.message}. Проверьте, что workflow в n8n активен и CORS настроен.`;
+          : `Ошибка: ${
+              error instanceof Error ? error.message : String(error)
+            }. Проверьте, что workflow в n8n активен и CORS настроен.`;
         patchMessage(loadingId, { message });
       }
     },
     [patchMessage]
   );
 
-  // Текст теперь plain-text (свой textarea), поэтому HTML парсить не нужно.
   const handleInputChange = useCallback(
-    (text) => {
+    (text: string) => {
       setInputValue(text);
-      // Если пользователь стёр плейсхолдер с картинкой, сбрасываем её.
       if (pendingImage && text === '') {
         setPendingImage(null);
       }
@@ -71,7 +83,7 @@ export function useChat() {
     [pendingImage]
   );
 
-  const handleSend = useCallback(async () => {
+  const handleSend = useCallback(async (): Promise<void> => {
     const caption =
       inputValue === PENDING_IMAGE_PLACEHOLDER || inputValue === ''
         ? ''
@@ -97,7 +109,7 @@ export function useChat() {
     const loadingMessage = makeMessage({ message: '…' });
     addMessage(loadingMessage);
 
-    const payload = imageToSend
+    const payload: WebhookPayload = imageToSend
       ? {
           message: caption,
           image: imageToSend.slice(imageToSend.indexOf(',') + 1),
@@ -109,7 +121,7 @@ export function useChat() {
   }, [inputValue, pendingImage, addMessage, requestReply]);
 
   const handleFileChange = useCallback(
-    async (event) => {
+    async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
       const file = event.target.files?.[0];
       event.target.value = '';
       if (!file) return;
@@ -121,7 +133,7 @@ export function useChat() {
         return;
       }
 
-      let imageDataUrl;
+      let imageDataUrl: string;
       try {
         imageDataUrl = await fileToJpegDataUrl(file);
       } catch (error) {
@@ -157,7 +169,7 @@ export function useChat() {
     [addMessage, requestReply]
   );
 
-  const handlePasteImage = useCallback((dataUrl) => {
+  const handlePasteImage = useCallback((dataUrl: string) => {
     setPendingImage(dataUrl);
     setInputValue(PENDING_IMAGE_PLACEHOLDER);
   }, []);

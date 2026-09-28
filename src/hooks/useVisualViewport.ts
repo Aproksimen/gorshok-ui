@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react';
 
+export interface Viewport {
+  top: number;
+  left: number;
+  height: number;
+  width: number;
+}
+
 // Возвращает актуальные размеры visual viewport (важно на iOS при открытии
 // клавиатуры). Применяется через inline-стиль, без прямой записи в DOM.
-function getViewport() {
+function getViewport(): Viewport {
   const vv = window.visualViewport;
   return {
     top: vv ? vv.offsetTop : 0,
@@ -12,8 +19,8 @@ function getViewport() {
   };
 }
 
-export function useVisualViewport() {
-  const [viewport, setViewport] = useState(getViewport);
+export function useVisualViewport(): Viewport {
+  const [viewport, setViewport] = useState<Viewport>(getViewport);
 
   useEffect(() => {
     const update = () => setViewport(getViewport());

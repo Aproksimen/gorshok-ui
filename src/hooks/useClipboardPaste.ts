@@ -1,12 +1,21 @@
 import { useCallback } from 'react';
+import type { ClipboardEvent } from 'react';
 import { fileToJpegDataUrl } from '../utils/image';
+
+interface UseClipboardPasteOptions {
+  onImage: (dataUrl: string) => void;
+  onError: () => void;
+}
 
 // Возвращает onPaste-обработчик для поля ввода.
 // Перехватываем только картинки; текст браузер вставит сам (textarea принимает
 // только plain text, форматирование отбрасывается автоматически).
-export function useClipboardPaste({ onImage, onError }) {
+export function useClipboardPaste({
+  onImage,
+  onError,
+}: UseClipboardPasteOptions) {
   return useCallback(
-    (event) => {
+    (event: ClipboardEvent<HTMLTextAreaElement>) => {
       const clipboardData = event.clipboardData;
       if (!clipboardData) return;
 
@@ -22,7 +31,7 @@ export function useClipboardPaste({ onImage, onError }) {
 
           fileToJpegDataUrl(file)
             .then((dataUrl) => onImage(dataUrl))
-            .catch((error) => {
+            .catch((error: unknown) => {
               console.error('Clipboard image processing error:', error);
               onError();
             });
