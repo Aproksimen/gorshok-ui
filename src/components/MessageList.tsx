@@ -16,11 +16,27 @@ export default function MessageList({ messages }: MessageListProps) {
   // как контент изменился. Если мерить после, рост контента (ответ агента
   // длиннее индикатора «…») ошибочно выглядит как «пользователь прокрутил вверх».
   const pinnedToBottomRef = useRef(true);
+  // Предыдущий список сообщений, чтобы отличать «пользователь отправил своё
+  // сообщение» (показываем всегда) от «пришло входящее» (только при прилипании).
+  const prevMessagesRef = useRef<Message[]>([]);
 
   useLayoutEffect(() => {
     const el = scrollRef.current;
-    if (!el || !pinnedToBottomRef.current) return;
-    el.scrollTop = el.scrollHeight;
+    if (!el) return;
+
+    const prev = prevMessagesRef.current;
+    // Своё сообщение пользователь хочет видеть всегда — докручиваем вниз,
+    // даже если он до этого прокрутил ленту вверх.
+    const hasNewOutgoing = messages.some(
+      (message) =>
+        message.direction === 'outgoing' &&
+        !prev.some((previous) => previous.id === message.id)
+    );
+    prevMessagesRef.current = messages;
+
+    if (hasNewOutgoing || pinnedToBottomRef.current) {
+      el.scrollTop = el.scrollHeight;
+    }
   }, [messages]);
 
   const handleScroll = () => {

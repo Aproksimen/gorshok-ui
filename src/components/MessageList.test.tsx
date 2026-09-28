@@ -106,4 +106,29 @@ describe('MessageList', () => {
 
     expect(metrics.getScrollTop()).toBe(0);
   });
+
+  it('scrolls to the bottom when the user sends their own message, even after scrolling up', () => {
+    const { rerender, container } = render(<MessageList messages={[baseMessage]} />);
+    const scroller = container.querySelector('.chat-messages') as HTMLElement;
+    const metrics = mockScrollMetrics(scroller, {
+      scrollTop: 0,
+      scrollHeight: 1000,
+      clientHeight: 200,
+    });
+
+    // Пользователь прокрутил вверх — «отлип» от низа.
+    fireEvent.scroll(scroller);
+
+    const ownMessage: Message = {
+      ...baseMessage,
+      id: '2',
+      sender: 'user',
+      direction: 'outgoing',
+      message: 'Мой запрос',
+    };
+
+    rerender(<MessageList messages={[baseMessage, ownMessage]} />);
+
+    expect(metrics.getScrollTop()).toBe(1000);
+  });
 });
