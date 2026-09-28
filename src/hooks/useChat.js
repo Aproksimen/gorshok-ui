@@ -40,7 +40,7 @@ export function useChat() {
   }, []);
 
   // Единая точка сетевого запроса: убирает дублирование между отправкой
-  // текста (handleSend) и отправкой картинки (handleFileChange).
+  // текста и отправкой картинки.
   const requestReply = useCallback(
     async (loadingId, payload) => {
       try {
@@ -59,60 +59,54 @@ export function useChat() {
     [patchMessage]
   );
 
+  // Текст теперь plain-text (свой textarea), поэтому HTML парсить не нужно.
   const handleInputChange = useCallback(
-    (html) => {
-      setInputValue(html);
+    (text) => {
+      setInputValue(text);
       // Если пользователь стёр плейсхолдер с картинкой, сбрасываем её.
-      const tmp = document.createElement('div');
-      tmp.innerHTML = html || '';
-      if (!tmp.textContent && pendingImage) {
+      if (pendingImage && text === '') {
         setPendingImage(null);
       }
     },
     [pendingImage]
   );
 
-  const handleSend = useCallback(
-    async (text) => {
-      // Извлекаем чистый текст из innerHTML, который присылает MessageInput.
-      const tmp = document.createElement('div');
-      tmp.innerHTML = text || '';
-      const plainText = tmp.textContent || '';
+  const handleSend = useCallback(async () => {
+    const caption =
+      inputValue === PENDING_IMAGE_PLACEHOLDER || inputValue === ''
+        ? ''
+        : inputValue;
+    const imageToSend = pendingImage;
 
-      const imageToSend = pendingImage;
-      const caption =
-        plainText === PENDING_IMAGE_PLACEHOLDER ? '' : plainText;
+    if (!caption && !imageToSend) return;
 
-      addMessage(
-        makeMessage({
+    addMessage(
+      makeMessage({
+        message: caption,
+        sender: 'user',
+        direction: 'outgoing',
+        ...(imageToSend && { image: imageToSend }),
+      })
+    );
+
+    setInputValue('');
+    if (imageToSend) {
+      setPendingImage(null);
+    }
+
+    const loadingMessage = makeMessage({ message: '…' });
+    addMessage(loadingMessage);
+
+    const payload = imageToSend
+      ? {
           message: caption,
-          sender: 'user',
-          direction: 'outgoing',
-          ...(imageToSend && { image: imageToSend }),
-        })
-      );
+          image: imageToSend.slice(imageToSend.indexOf(',') + 1),
+          imageMimeType: 'image/jpeg',
+        }
+      : { message: caption };
 
-      // Отправили сообщение — очищаем поле ввода и отложенное изображение.
-      setInputValue('');
-      if (imageToSend) {
-        setPendingImage(null);
-      }
-
-      const loadingMessage = makeMessage({ message: '…' });
-      addMessage(loadingMessage);
-
-      const payload = imageToSend
-        ? {
-            message: caption,
-            image: imageToSend.slice(imageToSend.indexOf(',') + 1),
-            imageMimeType: 'image/jpeg',
-          }
-        : { message: plainText };
-
-      await requestReply(loadingMessage.id, payload);
-    },
-    [pendingImage, addMessage, requestReply]
-  );
+    await requestReply(loadingMessage.id, payload);
+  }, [inputValue, pendingImage, addMessage, requestReply]);
 
   const handleFileChange = useCallback(
     async (event) => {
@@ -174,10 +168,12 @@ export function useChat() {
     );
   }, [addMessage]);
 
+  const canSend = Boolean(pendingImage) || inputValue.trim() !== '';
+
   return {
     messages,
     inputValue,
-    sendDisabled: pendingImage ? false : undefined,
+    sendDisabled: !canSend,
     handleInputChange,
     handleSend,
     handleFileChange,
