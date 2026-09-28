@@ -20,7 +20,7 @@
 
 ```
 src/
-  App.jsx                      # композиция
+  App.jsx                      # композиция + kit-JSX (см. ограничение kit ниже)
   constants.js                 # бренд-константы, SENT_TIME, лимиты
   utils/image.js               # loadImage, getResizedDimensions, fileToJpegDataUrl
   api/webhook.js               # sendToWebhook + таймаут, URL из env
@@ -28,10 +28,6 @@ src/
     useVisualViewport.js       # --vv-* переменные + preventBodyScroll
     useChat.js                 # messages/inputValue/pendingImage + send/attach
     useClipboardPaste.js       # вставка текста/картинки из буфера
-  components/
-    ChatHeader.jsx             # ConversationHeader
-    MessageList.jsx            # MessageList + map сообщений
-    ChatInput.jsx              # MessageInput (+ файловый input)
 .env.example                   # VITE_WEBHOOK_URL
 .env                          # локальная копия (gitignored)
 ```
@@ -95,10 +91,13 @@ export function useVisualViewport(): void
 - `useClipboardPaste` — перенос paste-эффекта, использует `onImage`/`onError`.
 - Верификация: lint + build.
 
-### Задача 6. `src/components/*`
-- `ChatHeader`, `MessageList`, `ChatInput` — перенос JSX без изменений.
-- Файловый `<input>` остаётся прямым потомком `MainContainer` (как в оригинале), чтобы не менять позиционирование `.file-input`.
-- Верификация: lint + build.
+### Задача 6. `src/components/*` — ОТМЕНЕНО (обнаружено при ручной проверке)
+- Первоначально JSX был разнесён на `ChatHeader`/`MessageList`/`ChatInput`.
+- При ручной проверке (headless-рендер) оказалось, что эти обёртки **молча отбрасываются**
+  компонентом `ChatContainer`: его `getChildren()` извлекает прямых детей строго по типу
+  `[ConversationHeader, MessageList, MessageInput, InputToolbox]` и игнорирует всё остальное.
+- Итог: компоненты удалены, kit-JSX оставлен inline в `App.jsx` (как в оригинале).
+- Верификация: lint + build + headless-рендер (совпадает с оригиналом: заголовок, лента, ввод).
 
 ### Задача 7. `src/App.jsx` — композиция
 - App собирает: `useVisualViewport` + `useChat` + `useClipboardPaste` + компоненты.
@@ -117,3 +116,7 @@ export function useVisualViewport(): void
 - Ruling: `fileInputRef` удалён как мёртвый код (нигде не читается).
 - Ruling: id заглушек → `crypto.randomUUID()` (безопаснее `Date.now()`).
 - Ruling: таймаут добавляет новое сообщение об ошибке для `AbortError` (обязательная часть P0 #4).
+- Ruling: kit-JSX (`ConversationHeader`/`MessageList`/`MessageInput`) **нельзя** оборачивать в свои
+  компоненты — `ChatContainer` использует slot-механизм `getChildren()` и отбрасывает не-совпавшие
+  типы детей без ошибки. Поэтому декомпозиция ограничена хуками/api/utils/constants, а kit-JSX
+  остаётся inline в `App.jsx`.
