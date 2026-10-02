@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-// sendToWebhook читает import.meta.env.VITE_WEBHOOK_URL при загрузке модуля,
-// поэтому пере-импортируем модуль с подставленным значением на каждый тест.
-async function loadWebhook(url: string) {
+// sendToWebhook читает import.meta.env при загрузке модуля,
+// поэтому пере-импортируем модуль с подставленными значениями на каждый тест.
+async function loadWebhook(url: string, apiKey: string = '') {
   vi.resetModules();
   vi.stubEnv('VITE_WEBHOOK_URL', url);
+  vi.stubEnv('VITE_WEBHOOK_API_KEY', apiKey);
   return import('./webhook');
 }
 
@@ -31,14 +32,22 @@ describe('sendToWebhook', () => {
     await expect(sendToWebhook({ message: 'hi' })).rejects.toThrow('VITE_WEBHOOK_URL');
   });
 
-  it('posts JSON and returns the parsed response', async () => {
+  it('throws when VITE_WEBHOOK_API_KEY is not set', async () => {
+    const { sendToWebhook } = await loadWebhook('https://example.com/hook', '');
+    await expect(sendToWebhook({ message: 'hi' })).rejects.toThrow('VITE_WEBHOOK_API_KEY');
+  });
+
+  it('posts JSON with X-API-Key header and returns the parsed response', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ reply: 'Ответ бота' }),
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    const { sendToWebhook } = await loadWebhook('https://example.com/hook');
+    const { sendToWebhook } = await loadWebhook(
+      'https://example.com/hook',
+      'bbfd439a-265f-4b7f-bf0e-16f0d04aa34b'
+    );
     const data = await sendToWebhook({ message: 'hi' });
 
     expect(data).toEqual({ reply: 'Ответ бота' });
@@ -47,13 +56,17 @@ describe('sendToWebhook', () => {
     expect(url).toBe('https://example.com/hook');
     expect(init.method).toBe('POST');
     expect(init.headers['Content-Type']).toBe('application/json');
+    expect(init.headers['X-API-Key']).toBe('bbfd439a-265f-4b7f-bf0e-16f0d04aa34b');
     expect(JSON.parse(init.body)).toEqual({ message: 'hi' });
   });
 
   it('throws on a non-OK HTTP response', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 500 }));
 
-    const { sendToWebhook } = await loadWebhook('https://example.com/hook');
+    const { sendToWebhook } = await loadWebhook(
+      'https://example.com/hook',
+      'bbfd439a-265f-4b7f-bf0e-16f0d04aa34b'
+    );
     await expect(sendToWebhook({ message: 'hi' })).rejects.toThrow('HTTP 500');
   });
 
@@ -71,7 +84,10 @@ describe('sendToWebhook', () => {
     );
     vi.stubGlobal('fetch', fetchMock);
 
-    const { sendToWebhook } = await loadWebhook('https://example.com/hook');
+    const { sendToWebhook } = await loadWebhook(
+      'https://example.com/hook',
+      'bbfd439a-265f-4b7f-bf0e-16f0d04aa34b'
+    );
     const promise = sendToWebhook({ message: 'hi' }, { timeoutMs: 1000 });
     const assertion = expect(promise).rejects.toThrow('aborted');
 

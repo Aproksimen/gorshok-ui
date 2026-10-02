@@ -1,4 +1,5 @@
 const WEBHOOK_URL = import.meta.env.VITE_WEBHOOK_URL;
+const WEBHOOK_API_KEY = import.meta.env.VITE_WEBHOOK_API_KEY;
 
 const DEFAULT_TIMEOUT_MS = 30000;
 
@@ -25,6 +26,9 @@ export async function sendToWebhook(
   if (!WEBHOOK_URL) {
     throw new Error('VITE_WEBHOOK_URL не задана (см. .env.example)');
   }
+  if (!WEBHOOK_API_KEY) {
+    throw new Error('VITE_WEBHOOK_API_KEY не задана (см. .env.example)');
+  }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -32,7 +36,10 @@ export async function sendToWebhook(
   try {
     const response = await fetch(WEBHOOK_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': WEBHOOK_API_KEY,
+      },
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
